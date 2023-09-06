@@ -1,6 +1,6 @@
 package com.telegram.bot.config;
 
-import com.telegram.bot.TelegramBot;
+import com.telegram.bot.controller.TelegramBot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
