@@ -1,29 +1,49 @@
 package com.telegram.bot.model;
 
-import lombok.Builder;
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
+@Entity
+@Table(name = "proxies", schema = "public")
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class ChinaProxy {
-    @Getter
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String username;
-    @Getter
+
     private String password;
-    @Getter
+
+    @Column(name = "ip_address")
     private String ipAddress;
-    @Getter
+
     private int port;
 
-    private AtomicBoolean valid;
+    @Column(name = "created_at")
+    private ZonedDateTime createdAt;
 
-    public synchronized boolean isValid() {
-        return valid.get();
+    private Boolean valid;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Vladivostok"));
+        }
+        if (this.valid == null) {
+            this.valid = true;
+        }
     }
 
-    public synchronized void setValid(boolean valid) {
-        this.valid.set(valid);
+    @Override
+    public String toString() {
+        return "%s-%s:%s:%s:%s".formatted(id, username, password, ipAddress, port);
     }
-
 }

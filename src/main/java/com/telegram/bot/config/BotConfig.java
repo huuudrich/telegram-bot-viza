@@ -1,9 +1,6 @@
 package com.telegram.bot.config;
 
-import com.telegram.bot.commands.CityKeyboardHandler;
-import com.telegram.bot.commands.CommandHandler;
-import com.telegram.bot.commands.DocumentLoadHandler;
-import com.telegram.bot.commands.StartCommandHandler;
+import com.telegram.bot.commands.*;
 import com.telegram.bot.commands.proxy.ProxyCommandsHandler;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +30,21 @@ public class BotConfig {
 
     @Autowired
     private DocumentLoadHandler documentLoadHandler;
+    @Autowired
+    private ProxyCallbackHandler proxyCallbackHandler;
+
 
     @Bean
     public CommandHandler firstHandler() {
         startCommandHandler.setNext(proxyCommandsHandler);
-        proxyCommandsHandler.setNext(documentLoadHandler);
-        // если есть еще обработчики, устанавливаем их тут
-        return startCommandHandler; // возвращаем первый обработчик в цепочке
+
+        return startCommandHandler;
+    }
+
+    @Bean
+    public CallbackHandler secondHandler() {
+        proxyCommandsHandler.setNext(proxyCommandsHandler);
+
+        return proxyCallbackHandler;
     }
 }

@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS user_dates CASCADE;
+DROP TABLE IF EXISTS proxies CASCADE;
 
 CREATE TABLE IF NOT EXISTS users
 (
@@ -23,6 +24,18 @@ CREATE TABLE IF NOT EXISTS user_dates
     appointment_number VARCHAR(255)            NOT NULL,
     created_at         TIMESTAMP WITHOUT TIME ZONE,
     city               VARCHAR(255)            NOT NULL,
-    is_registered      BOOLEAN DEFAULT 'false' NOT NULL
+    is_registered BOOLEAN NOT NULL DEFAULT 'false',
+    FOREIGN KEY (owner_id) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS proxies
+(
+    id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    username   VARCHAR(100) NOT NULL,
+    password   VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(100) NOT NULL,
+    port       INTEGER      NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    valid      BOOLEAN      NOT NULL DEFAULT 'TRUE'
 );
 
