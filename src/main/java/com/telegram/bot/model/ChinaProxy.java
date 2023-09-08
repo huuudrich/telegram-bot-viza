@@ -44,6 +44,6 @@ public class ChinaProxy {
 
     @Override
     public String toString() {
-        return "%s-%s:%s:%s:%s".formatted(id, username, password, ipAddress, port);
+        return "%s. %s:%s:%s:%s".formatted(id, username, password, ipAddress, port);
     }
 }

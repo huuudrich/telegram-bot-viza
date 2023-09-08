@@ -1,12 +1,13 @@
 package com.telegram.bot.commands;
 
+import com.telegram.bot.controller.TelegramBot;
 import com.telegram.bot.model.ChinaProxy;
 import com.telegram.bot.model.CmdMessage;
-import com.telegram.bot.model.MessageHandlerContext;
 import com.telegram.bot.repository.ChinaProxyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.BufferedReader;
@@ -22,24 +23,31 @@ import java.util.List;
 public class DocumentLoadHandler {
 
     private final ChinaProxyRepository proxyRepository;
+    private final TelegramBot bot;
 
-    public void handle(Update update, MessageHandlerContext context, File file) {
+    public void handle(Update update, long chatId) {
         String fileName = update.getMessage().getDocument().getFileName();
+        String fileId = update.getMessage().getDocument().getFileId();
 
         if (fileName.equals("proxy.txt")) {
+            java.io.File file = bot.downloadDocument(GetFile.builder().fileId(fileId).build());
+
             List<ChinaProxy> proxies = new ArrayList<>(extractProxiesFromFile(file));
+
             proxyRepository.saveAll(proxies);
             String info = "Прокси успешно загружены и сохранены в базу";
+
             log.info(info);
-            context.setResponseMessage(CmdMessage.builder()
-                    .chatId(update.getMessage().getChatId())
+
+            bot.sendMessage(CmdMessage.builder()
+                    .chatId(chatId)
                     .message(info)
                     .build());
         } else if (fileName.equals("requests.txt")) {
 
         } else {
-            context.setResponseMessage(CmdMessage.builder()
-                    .chatId(update.getMessage().getChatId())
+            bot.sendMessage(CmdMessage.builder()
+                    .chatId(chatId)
                     .message("Нет обработки такого файла")
                     .build());
         }

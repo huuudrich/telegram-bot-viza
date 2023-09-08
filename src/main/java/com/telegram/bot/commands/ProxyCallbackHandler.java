@@ -1,6 +1,9 @@
 package com.telegram.bot.commands;
 
-import com.telegram.bot.model.*;
+import com.telegram.bot.controller.TelegramBot;
+import com.telegram.bot.model.ChinaProxy;
+import com.telegram.bot.model.CmdMessage;
+import com.telegram.bot.model.InlineButton;
 import com.telegram.bot.repository.ChinaProxyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 public class ProxyCallbackHandler implements CallbackHandler {
     private CallbackHandler next;
     private final ChinaProxyRepository proxyRepository;
+    private final TelegramBot bot;
 
     @Override
     public void setNext(CallbackHandler handler) {
@@ -27,71 +31,77 @@ public class ProxyCallbackHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(Update update, MessageHandlerContext context) {
+    public void handle(Update update, long chatId) {
         String callbackData = update.getCallbackQuery().getData();
-        long chatId = update.getCallbackQuery().getMessage().getChatId();
-        if (callbackData.equals("load-proxy")) {
-            context.setResponseMessage(CmdMessage.builder()
-                    .chatId(chatId)
-                    .message("Загрузи файл с названием и форматом proxy.txt \n" +
-                            "формат прокси - USERNAME:PASSWORD:IP:PORT \n" +
-                            "каждое прокси на новой строке без пробелов и другой хуеты. \n" +
-                            "УЧТИ ЧТО ЭТИ ПРОКСИ ПОЛНОСТЬЮ ОБНОВЯТ СПИСОК В БАЗЕ ДАННЫХ \n")
+        Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+
+        System.out.println(callbackData);
+
+        switch (callbackData) {
+            case "load-proxy" -> bot.sendMessage(CmdMessage.builder()
+                    .chatId(chatId).message("""
+                            Загрузи файл с названием и форматом proxy.txt\s
+                            формат прокси - USERNAME:PASSWORD:IP:PORT\s
+                            каждое прокси на новой строке без пробелов и другой хуеты.\s
+                            УЧТИ ЧТО ЭТИ ПРОКСИ ДОБАВЯТСЯ К СПИСКУ В БД\s
+                            """)
                     .build());
-        } else if (callbackData.equals("clear-proxy")) {
-            proxyRepository.deleteAll();
-            String info = "Таблица с прокси успешна очищена";
-            log.info(info);
-            context.setResponseMessage(CmdMessage.builder()
-                    .chatId(chatId)
-                    .message(info)
-                    .build());
-        } else if (callbackData.contains("check-proxy")) {
-            int pageNumber = 0;
-            if (callbackData.contains(":")) {
-                pageNumber = Integer.parseInt(callbackData.split(":")[1]);
-            }
-
-            Pageable pageable = PageRequest.of(pageNumber, 10);
-
-            Page<ChinaProxy> page = proxyRepository.findAll(pageable);
-            List<ChinaProxy> proxies = page.getContent();
-
-            if (proxies.isEmpty()) {
-                context.setResponseMessage(CmdMessage.builder()
-                        .chatId(chatId)
-                        .message("Список прокси пуст")
-                        .build());
-                return;
-            }
-
-            List<InlineButton> buttons = new ArrayList<>();
-
-            String messageText = proxies.stream()
-                    .map(ChinaProxy::toString)
-                    .collect(Collectors.joining("\n"));
-
-            if (page.hasPrevious()) {
-                buttons.add(InlineButton.builder()
-                        .text("Назад")
-                        .callbackData("check-proxy-page:" + (page.getNumber() - 1))
+            case "clear-proxy" -> {
+                proxyRepository.deleteAll();
+                String info = "Таблица с прокси успешна очищена";
+                log.info(info);
+                bot.sendMessage(CmdMessage.builder().chatId(chatId).message(info)
                         .build());
             }
-
-            if (page.hasNext()) {
-                buttons.add(InlineButton.builder()
-                        .text("Вперед")
-                        .callbackData("check-proxy-page:" + (page.getNumber() + 1))
-                        .build());
+            case "check-proxy" -> proxyScroll(callbackData, chatId, false, messageId);
+            default -> {
+                if (callbackData.contains("check-proxy-page:")) {
+                    proxyScroll(callbackData, chatId, true, messageId);
+                } else {
+                    next.handle(update, chatId);
+                }
             }
+        }
+    }
 
+    private void proxyScroll(String callbackData, long chatId, boolean isEditedMsg, int messageId) {
+        int pageNumber = 0;
 
-            context.setEditedResponseMessage(EditedCmdMessage.builder()
-                    .chatId(chatId)
+        if (isEditedMsg) {
+            pageNumber = Integer.parseInt(callbackData.split(":")[1]);
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, 10);
+
+        Page<ChinaProxy> page = proxyRepository.findAll(pageable);
+        List<ChinaProxy> proxies = page.getContent();
+
+        if (proxies.isEmpty()) {
+            bot.sendMessage(CmdMessage.builder().chatId(chatId).message("Список прокси пуст").build());
+            return;
+        }
+
+        List<InlineButton> buttons = new ArrayList<>();
+
+        String messageText = proxies.stream().map(ChinaProxy::toString).collect(Collectors.joining("\n"));
+
+        if (page.hasPrevious()) {
+            buttons.add(InlineButton.builder().text("Назад").callbackData("check-proxy-page:" + (page.getNumber() - 1)).build());
+        }
+
+        if (page.hasNext()) {
+            buttons.add(InlineButton.builder().text("Вперед").callbackData("check-proxy-page:" + (page.getNumber() + 1)).build());
+        }
+
+        if (isEditedMsg) {
+            bot.sendEditedMessage(CmdMessage.builder().chatId(chatId)
+                    .message(messageText)
+                    .messageId(messageId)
+                    .inlineButtons(buttons).build());
+        } else {
+            bot.sendMessage(CmdMessage.builder().chatId(chatId)
                     .message(messageText)
                     .inlineButtons(buttons).build());
-        } else if (next != null) {
-            next.handle(update, context);
         }
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 public class CmdMessage {
     private Long chatId;
     private String message;
+    private Integer messageId;
     private List<KeyboardButton> buttons;
     private List<InlineButton> inlineButtons;
 }
