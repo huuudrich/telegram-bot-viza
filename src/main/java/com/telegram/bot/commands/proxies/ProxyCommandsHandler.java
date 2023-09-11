@@ -1,4 +1,4 @@
-package com.telegram.bot.commands.proxy;
+package com.telegram.bot.commands.proxies;
 
 import com.telegram.bot.commands.CommandHandler;
 import com.telegram.bot.controller.TelegramBot;
@@ -14,15 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProxyCommandsHandler implements CommandHandler {
     private CommandHandler next;
-    private static final String proxy = """
-              ####      ####      ####    ##  ##   ##  ##
-             ##  ##    ##  ##   ##  ##   ##  ##   ##  ##
-             ##  ##    ##  ##   ##  ##    ####    ##  ##
-             ####      ####     ##  ##      ##        ####
-             ##           ####      ##  ##    ####       ##
-             ##           ## ##     ##  ##   ##  ##      ##
-             ##          ##  ##      ####    ##  ##      ##\
-            """;
     private final TelegramBot bot;
     @Override
     public void setNext(CommandHandler handler) {
@@ -39,9 +30,9 @@ public class ProxyCommandsHandler implements CommandHandler {
                     InlineButton.builder().text("Очистить список").callbackData("clear-proxy").build(),
                     InlineButton.builder().text("Посмотреть список").callbackData("check-proxy").build());
 
-            bot.sendMessage(CmdMessage.builder()
+            bot.sendImageWithButtons(CmdMessage.builder()
                     .chatId(chatId)
-                    .message(proxy)
+                    .imageUrl("https://i.imgur.com/PiN3dow.png")
                     .inlineButtons(buttons)
                     .build());
         } else if (next != null) {

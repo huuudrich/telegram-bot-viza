@@ -11,10 +11,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -80,6 +82,33 @@ public class TelegramBot extends TelegramLongPollingBot {
             log.error("Ошибка при отправке отредактированного сообщения");
         }
     }
+
+    public void sendImageWithButtons(CmdMessage cmdMessage) {
+        SendPhoto sendPhotoRequest = new SendPhoto();
+        sendPhotoRequest.setChatId(cmdMessage.getChatId());
+        sendPhotoRequest.setPhoto(new InputFile(cmdMessage.getImageUrl()));
+        sendPhotoRequest.setReplyMarkup(keyboardCreator.createInlineKeyboard(cmdMessage.getInlineButtons()));
+
+        try {
+            execute(sendPhotoRequest);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка при отправке фото URL с кнопками");
+        }
+    }
+
+    public void sendGif(long chatId, String gifUrl) {
+        try {
+            SendDocument sendDocumentRequest = new SendDocument();
+            sendDocumentRequest.setChatId(chatId);
+            sendDocumentRequest.setDocument(new InputFile(gifUrl));
+
+
+            execute(sendDocumentRequest);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка при загрузке гифки");
+        }
+    }
+
 
     public void sendMessage(CmdMessage cmdMessage) {
         SendMessage sendMessage = new SendMessage();

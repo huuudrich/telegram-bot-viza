@@ -1,5 +1,6 @@
-package com.telegram.bot.commands;
+package com.telegram.bot.commands.proxies;
 
+import com.telegram.bot.commands.CallbackHandler;
 import com.telegram.bot.controller.TelegramBot;
 import com.telegram.bot.model.ChinaProxy;
 import com.telegram.bot.model.CmdMessage;
@@ -34,8 +35,6 @@ public class ProxyCallbackHandler implements CallbackHandler {
     public void handle(Update update, long chatId) {
         String callbackData = update.getCallbackQuery().getData();
         Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-
-        System.out.println(callbackData);
 
         switch (callbackData) {
             case "load-proxy" -> bot.sendMessage(CmdMessage.builder()
