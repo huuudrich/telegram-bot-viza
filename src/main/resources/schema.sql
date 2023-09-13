@@ -19,11 +19,12 @@ CREATE TABLE IF NOT EXISTS user_dates
     id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     owner_id           BIGINT                  NOT NULL,
     name_surname       VARCHAR(255)            NOT NULL,
-    phone              VARCHAR(255),
+    phone    VARCHAR(255) NOT NULL,
     email              VARCHAR(255)            NOT NULL,
+    passport VARCHAR(255),
     appointment_number VARCHAR(255)            NOT NULL,
     created_at         TIMESTAMP WITHOUT TIME ZONE,
-    city               VARCHAR(255)            NOT NULL,
+    city_type               VARCHAR(255)            NOT NULL,
     is_registered BOOLEAN NOT NULL DEFAULT 'false',
     FOREIGN KEY (owner_id) REFERENCES users (id)
 );

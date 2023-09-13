@@ -29,10 +29,13 @@ public class UserData {
 
     private String email;
 
+    private String passport;
+
     @JoinColumn(name = "appointment_number", unique = true)
     private String appointmentNumber;
 
-    private City city;
+    @JoinColumn(name = "city_type")
+    private CityType cityType;
 
     @JoinColumn(name = "created_at")
     private ZonedDateTime createdAt;
@@ -49,5 +52,21 @@ public class UserData {
 
     public String getLogInfo() {
         return String.format("%s %s %s %s", getNameSurname(), getPhone(), getEmail(), getAppointmentNumber());
+    }
+
+    @Override
+    public String toString() {
+        return "UserData{" +
+                "id=" + id +
+                ", owner=" + owner +
+                ", nameSurname='" + nameSurname + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", passport='" + passport + '\'' +
+                ", appointmentNumber='" + appointmentNumber + '\'' +
+                ", cityType=" + cityType +
+                ", createdAt=" + createdAt +
+                ", isRegistered=" + isRegistered +
+                '}';
     }
 }

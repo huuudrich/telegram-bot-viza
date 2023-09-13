@@ -1,8 +1,7 @@
 package com.telegram.bot.commands;
 
-import com.telegram.bot.commands.CallbackHandler;
 import com.telegram.bot.controller.TelegramBot;
-import com.telegram.bot.model.City;
+import com.telegram.bot.model.CityType;
 import com.telegram.bot.model.CmdMessage;
 import com.telegram.bot.model.InlineButton;
 import com.telegram.bot.model.ThreadType;
@@ -32,7 +31,7 @@ public class CityCallbackHandler implements CallbackHandler {
             if (callbackData.equals(tt.toString() + "-requests")) {
 
                 List<InlineButton> cityButtons = new ArrayList<>();
-                for (City code : City.values()) {
+                for (CityType code : CityType.values()) {
 
                     cityButtons.add(InlineButton.builder()
                             .text(code.getName())

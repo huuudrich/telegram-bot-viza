@@ -102,13 +102,11 @@ public class TelegramBot extends TelegramLongPollingBot {
             sendDocumentRequest.setChatId(chatId);
             sendDocumentRequest.setDocument(new InputFile(gifUrl));
 
-
             execute(sendDocumentRequest);
         } catch (TelegramApiException e) {
             log.error("Ошибка при загрузке гифки");
         }
     }
-
 
     public void sendMessage(CmdMessage cmdMessage) {
         SendMessage sendMessage = new SendMessage();
@@ -116,6 +114,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         sendMessage.setText(cmdMessage.getMessage());
 
         List<KeyboardButton> buttons = cmdMessage.getButtons();
+
+        if (cmdMessage.getReplyKeyboard() != null) {
+            sendMessage.setReplyMarkup(cmdMessage.getReplyKeyboard());
+        }
 
         if (buttons != null) {
             sendMessage.setReplyMarkup(keyboardCreator.replyKeyboardMarkup(buttons));

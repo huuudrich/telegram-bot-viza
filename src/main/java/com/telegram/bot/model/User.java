@@ -38,5 +38,7 @@ public class User {
     private Integer ordersCounter;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private Boolean isActive;
+
+
 }

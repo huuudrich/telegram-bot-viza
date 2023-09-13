@@ -4,7 +4,8 @@ import com.telegram.bot.commands.*;
 import com.telegram.bot.commands.CityCallbackHandler;
 import com.telegram.bot.commands.proxies.ProxyCallbackHandler;
 import com.telegram.bot.commands.proxies.ProxyCommandsHandler;
-import com.telegram.bot.commands.requests.RequestsCallbackHandler;
+import com.telegram.bot.commands.requests.RequestsMainCallbackHandler;
+import com.telegram.bot.commands.requests.RequestsCommandsHandler;
 import com.telegram.bot.commands.requests.RequestsThreadTypeHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,9 +16,11 @@ public class HandlerConfiguration {
     @Bean
     public CommandHandler firstHandler(StartCommandHandler startCommandHandler,
                                        ProxyCommandsHandler proxyCommandsHandler,
-                                       RequestsThreadTypeHandler requestsThreadTypeHandler) {
+                                       RequestsThreadTypeHandler requestsThreadTypeHandler,
+                                       RequestsCommandsHandler requestsCommandsHandler) {
         startCommandHandler.setNext(proxyCommandsHandler);
         proxyCommandsHandler.setNext(requestsThreadTypeHandler);
+        requestsThreadTypeHandler.setNext(requestsCommandsHandler);
         // Другие настройки цепочки обработчиков могут быть добавлены здесь
         return startCommandHandler;
     }
@@ -25,9 +28,9 @@ public class HandlerConfiguration {
     @Bean
     public CallbackHandler secondHandler(ProxyCallbackHandler proxyCallbackHandler,
                                          CityCallbackHandler cityCallbackHandler,
-                                         RequestsCallbackHandler requestsCallbackHandler) {
+                                         RequestsMainCallbackHandler requestsMainCallbackHandler) {
         proxyCallbackHandler.setNext(cityCallbackHandler);
-        cityCallbackHandler.setNext(requestsCallbackHandler);
+        cityCallbackHandler.setNext(requestsMainCallbackHandler);
 
         // Другие настройки цепочки обработчиков могут быть добавлены здесь
         return proxyCallbackHandler;
