@@ -2,8 +2,15 @@ package com.telegram.bot.commands.requests;
 
 import com.telegram.bot.commands.CommandHandler;
 import com.telegram.bot.controller.TelegramBot;
-import com.telegram.bot.model.*;
-import com.telegram.bot.repository.UserDataRepository;
+import com.telegram.bot.model.CityType;
+import com.telegram.bot.model.CmdMessage;
+import com.telegram.bot.model.ThreadType;
+import com.telegram.bot.model.User;
+import com.telegram.bot.model.data.BookingData;
+import com.telegram.bot.model.data.CheckerData;
+import com.telegram.bot.model.data.UserData;
+import com.telegram.bot.repository.BookingDataRepository;
+import com.telegram.bot.repository.CheckerDataRepository;
 import com.telegram.bot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +20,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class RequestsCommandsHandler implements CommandHandler {
+public class RequestsLoadHandler implements CommandHandler {
     private CommandHandler next;
     private final TelegramBot bot;
-    private final UserDataRepository userDataRepository;
+    private final BookingDataRepository bookingDataRepository;
+    private final CheckerDataRepository checkerDataRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -50,28 +58,61 @@ public class RequestsCommandsHandler implements CommandHandler {
             }
 
             User owner = userRepository.getUserByTelegramId(chatId);
-            UserData userData = UserData.builder()
-                    .owner(owner)
-                    .nameSurname(data[0])
-                    .phone(data[1])
-                    .email(data[2])
-                    .appointmentNumber(data[3])
-                    .cityType(cityType)
-                    .build();
 
-            if (cityType.equals(CityType.MSK) || cityType.equals(CityType.SPB)) {
-                userData.setPassport(data[4]);
-                userDataRepository.save(userData);
-            } else {
-                userDataRepository.save(userData);
+            boolean b = cityType.equals(CityType.MSK) || cityType.equals(CityType.SPB);
+
+            if (threadType.equals(ThreadType.BOOKERS)) {
+                if (b) {
+                    BookingData bookingData = (BookingData) createUserData(BookingData.class, data, owner, cityType);
+                    bookingData.setPassport(data[4]);
+                    bookingDataRepository.save(bookingData);
+                } else {
+                    BookingData bookingData = (BookingData) createUserData(BookingData.class, data, owner, cityType);
+                    bookingDataRepository.save(bookingData);
+                }
+            } else if (threadType.equals(ThreadType.CHECKER)) {
+                if (b) {
+                    CheckerData checkerData = (CheckerData) createUserData(CheckerData.class, data, owner, cityType);
+                    checkerData.setPassport(data[4]);
+                    checkerDataRepository.save(checkerData);
+                } else {
+                    CheckerData checkerData = (CheckerData) createUserData(CheckerData.class, data, owner, cityType);
+                    checkerDataRepository.save(checkerData);
+                }
             }
-            String info = "Данные успешно сохранены: %s".formatted(userData.getLogInfo());
+
+            String info = (("Тип: %s\n" +
+                    "Город: %s\n" +
+                    "Данные успешно сохранены").formatted(threadType, cityType.getName()));
+
             log.info(info);
             bot.sendMessage(CmdMessage.builder()
                     .chatId(chatId)
                     .message(info)
                     .build());
         }
+    }
+
+    private UserData createUserData(Class<? extends UserData> type, String[] data, User owner, CityType cityType) {
+        UserData userData = new UserData();
+        try {
+            userData = type.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            log.warn("Ошибка создания userdata");
+        }
+
+        userData.setOwner(owner);
+        userData.setNameSurname(data[0]);
+        userData.setPhone(data[1]);
+        userData.setEmail(data[2]);
+        userData.setAppointmentNumber(data[3]);
+        userData.setCityType(cityType);
+
+        if (cityType.equals(CityType.MSK) || cityType.equals(CityType.SPB)) {
+            userData.setPassport(data[4]);
+        }
+
+        return userData;
     }
 
     private boolean validatedData(String[] data, long chatId) {
@@ -105,4 +146,5 @@ public class RequestsCommandsHandler implements CommandHandler {
         }
         return true;
     }
+
 }

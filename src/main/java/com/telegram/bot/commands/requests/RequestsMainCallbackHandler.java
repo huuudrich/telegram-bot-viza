@@ -6,12 +6,11 @@ import com.telegram.bot.model.CityType;
 import com.telegram.bot.model.CmdMessage;
 import com.telegram.bot.model.InlineButton;
 import com.telegram.bot.model.ThreadType;
-import com.telegram.bot.repository.UserDataRepository;
+import com.telegram.bot.repository.BookingDataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ import java.util.List;
 public class RequestsMainCallbackHandler implements CallbackHandler {
     private CallbackHandler next;
     private final TelegramBot bot;
-    private final UserDataRepository userDataRepository;
+    private final BookingDataRepository bookingDataRepository;
 
     @Override
     public void setNext(CallbackHandler handler) {
@@ -49,23 +48,7 @@ public class RequestsMainCallbackHandler implements CallbackHandler {
                             "Текущий город: %s ".formatted(cityType.getName()))
                     .inlineButtons(buttons)
                     .build());
-
-            if (callbackData.contains("-requests-city-load-str")) {
-                StringBuilder message = new StringBuilder("Тип: %s\n".formatted(threadType.toString()) +
-                        "Текущий город: %s\n".formatted(cityType.getName()) +
-                        "Пожалуйста, введите данные в формате\n" +
-                        "Имя Фамилия,телефон,email,номер заявки");
-                if (cityType.equals(CityType.MSK) || cityType.equals(CityType.SPB)) {
-                    message = new StringBuilder(message + ",номер паспорта");
-                }
-
-                bot.sendMessage(CmdMessage.builder()
-                        .chatId(chatId)
-                        .message(String.valueOf(message))
-                        .replyKeyboard(new ForceReplyKeyboard(true)).build());
-            }
         }
     }
-
 }
 

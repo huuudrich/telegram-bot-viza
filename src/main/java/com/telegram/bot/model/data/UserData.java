@@ -1,18 +1,19 @@
-package com.telegram.bot.model;
+package com.telegram.bot.model.data;
 
+import com.telegram.bot.model.CityType;
+import com.telegram.bot.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-@Entity
-@Table(name = "user_dates", schema = "public")
+@MappedSuperclass
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class UserData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

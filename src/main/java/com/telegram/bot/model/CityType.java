@@ -1,8 +1,11 @@
 package com.telegram.bot.model;
 
+import lombok.Getter;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
 public enum CityType {
     MSK("Москва"),
     SPB("Санкт-Петербург"),
@@ -15,10 +18,6 @@ public enum CityType {
 
     CityType(String name) {
         this.name = name;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public static CityType fromCode(String code) {

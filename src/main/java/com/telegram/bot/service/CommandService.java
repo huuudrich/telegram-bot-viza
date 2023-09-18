@@ -2,7 +2,7 @@ package com.telegram.bot.service;
 
 import com.telegram.bot.commands.CallbackHandler;
 import com.telegram.bot.commands.CommandHandler;
-import com.telegram.bot.commands.DocumentLoadHandler;
+import com.telegram.bot.commands.proxies.ProxyLoadHandler;
 import com.telegram.bot.controller.TelegramBot;
 import com.telegram.bot.model.CmdMessage;
 import com.telegram.bot.repository.UserRepository;
@@ -18,17 +18,17 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class CommandService {
     private final CommandHandler chainMessageHandler;
     private final CallbackHandler chainCallbackHandler;
-    private final DocumentLoadHandler documentLoadHandler;
+    private final ProxyLoadHandler proxyLoadHandler;
     private final UserRepository userRepository;
     private final TelegramBot bot;
 
     public CommandService(@Qualifier("firstHandler") CommandHandler chainMessageHandler,
                           @Qualifier("secondHandler") CallbackHandler chainCallbackHandler,
-                          DocumentLoadHandler documentLoadHandler,
+                          ProxyLoadHandler proxyLoadHandler,
                           UserRepository userRepository, TelegramBot bot) {
         this.chainMessageHandler = chainMessageHandler;
         this.chainCallbackHandler = chainCallbackHandler;
-        this.documentLoadHandler = documentLoadHandler;
+        this.proxyLoadHandler = proxyLoadHandler;
         this.userRepository = userRepository;
         this.bot = bot;
     }
@@ -68,7 +68,7 @@ public class CommandService {
 
     private void handleTextMessage(Update update, long chatId) {
         if (update.getMessage().hasDocument()) {
-            documentLoadHandler.handle(update, chatId);
+            proxyLoadHandler.handle(update, chatId);
         } else if (update.getMessage().hasText()) {
             chainMessageHandler.handle(update, chatId);
         }

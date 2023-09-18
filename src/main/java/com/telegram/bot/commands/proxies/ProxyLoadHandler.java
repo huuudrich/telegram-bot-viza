@@ -1,4 +1,4 @@
-package com.telegram.bot.commands;
+package com.telegram.bot.commands.proxies;
 
 import com.telegram.bot.controller.TelegramBot;
 import com.telegram.bot.model.ChinaProxy;
@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class DocumentLoadHandler {
+public class ProxyLoadHandler {
 
     private final ChinaProxyRepository proxyRepository;
     private final TelegramBot bot;

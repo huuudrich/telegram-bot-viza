@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS user_dates CASCADE;
+DROP TABLE IF EXISTS checkers_data CASCADE;
+DROP TABLE IF EXISTS bookers_data CASCADE;
 DROP TABLE IF EXISTS proxies CASCADE;
 
 CREATE TABLE IF NOT EXISTS users
@@ -14,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users
     is_active      BOOLEAN
 );
 
-CREATE TABLE IF NOT EXISTS user_dates
+CREATE TABLE IF NOT EXISTS checkers_data
 (
     id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     owner_id           BIGINT                  NOT NULL,
@@ -26,6 +27,21 @@ CREATE TABLE IF NOT EXISTS user_dates
     created_at         TIMESTAMP WITHOUT TIME ZONE,
     city_type               VARCHAR(255)            NOT NULL,
     is_registered BOOLEAN NOT NULL DEFAULT 'false',
+    FOREIGN KEY (owner_id) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS bookers_data
+(
+    id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    owner_id           BIGINT       NOT NULL,
+    name_surname       VARCHAR(255) NOT NULL,
+    phone              VARCHAR(255) NOT NULL,
+    email              VARCHAR(255) NOT NULL,
+    passport           VARCHAR(255),
+    appointment_number VARCHAR(255) NOT NULL,
+    created_at         TIMESTAMP WITHOUT TIME ZONE,
+    city_type          VARCHAR(255) NOT NULL,
+    is_registered      BOOLEAN      NOT NULL DEFAULT 'false',
     FOREIGN KEY (owner_id) REFERENCES users (id)
 );
 
